@@ -9,7 +9,7 @@ Upload a text file recorded with:
 - Debugger Xcode log of [Loop](https://github.com/LoopKit/Loop) as a Markdown (.md) file
 
 Hit process and it will:
-1. Show all list of all recorded temp basal commands.
+1. Extracts a list of all recorded temp basal commands.
 2. Check for mismatches for each temp basal command with the recorded PDM commands using this markdown file: 
 
 https://github.com/openaps/openomni/wiki/All-Temp-basal-units-for-0.5h
