@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    
+	<form action="#" method="post" enctype="multipart/form-data">
+		<h3>Upload rtlomni (.omni) or xcode logs (.md)</h3>
+		{% csrf_token %}
+		{{ form|crispy }}
+    	<input type="file" class="btn btn-info" placeholder=".omni, .md" name="myfile" value="Browse"/>
+    	<button type="submit" class="btn btn-success"/>Proces</button>
+	</form>
+    </br>
+	{% if contentOfFile.allcommands %}
+		<hr class="mt-0 mb-2">
+		<h5>All temp basal insulin commands in: {{file.name}}</h5>
+    	</br>
+    	<code>
+    	{{ contentOfFile.matching_tempbasals.header }}
+        </br>
+    	{% for command in contentOfFile.allcommands %}
+    	  {{ command }}
+    	  </br>
+		{% endfor %}
+		</code>
+	{% endif %}
+	{% if contentOfFile.matching_tempbasals%}
+		<hr class="mt-0 mb-2">
+		<h5>Tested matching PDM commands</h5>
+    	</br>
+    	{{ contentOfFile.matching_tempbasals.total_results }}
+    	<hr class="mt-0 mb-2">
+    	<code>
+    	{% for test in contentOfFile.matching_tempbasals.results %}
+    	  
+    	  {{ test.pdm }}
+    	  </br>
+    	  {{ test.loop }}
+    	  </br>
+    	  match: {{ test.match }}
+    	  </br>
+		{% endfor %}
+		</code>
+    {% endif %}
+{% endblock %}
