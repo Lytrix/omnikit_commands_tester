@@ -119,7 +119,7 @@ def match_temp_basals_pdm(commands, rawgit_page_pdm_values):
         if match == "No":
                 mismatch += 1
     if mismatch > 0:
-        total_results = "Found {}mismatches".format(mismatch)
+        total_results = "Found {} mismatches".format(mismatch)
     else:
         total_results = "No Temp basal mismatches found"
     return {"total_results": total_results, "results": tested_results, "header":  "Day....... Time.... "+ pdm_values[1]}
