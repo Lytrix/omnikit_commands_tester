@@ -1,13 +1,16 @@
-# Omnikit Commands Tester#
+# Omnikit Commands Tester #
 
 Small upload and test site to evaluate Omnikit commands. 
 
 ### Usage ###
 
-Upload a .omni or .md file created by using [rtlomni](https://github.com/openaps/openomni) or a saved Xcode log Loop as a Markdown (.md) file.
+Upload a text file recorded with:
+- [rtlomni](https://github.com/openaps/openomni) as a .omni file
+- Debugger Xcode log of [Loop](https://github.com/LoopKit/Loop) as a Markdown (.md) file
+
 Hit process and it will:
 1. Show all list of all recorded temp basal commands.
-2. Match each temp basal command with the recorded PDM commands using this markdown file: 
+2. Check for mismatches for each temp basal command with the recorded PDM commands using this markdown file: 
 
 https://github.com/openaps/openomni/wiki/All-Temp-basal-units-for-0.5h
 
