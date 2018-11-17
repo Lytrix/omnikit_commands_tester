@@ -8,7 +8,7 @@
 		{% csrf_token %}
 		{{ form|crispy }}
     	<input type="file" class="btn btn-info" placeholder=".omni, .md" name="myfile" value="Browse"/>
-    	<button type="submit" class="btn btn-success"/>Proces</button>
+    	<button type="submit" class="btn btn-success"/>Process</button>
 	</form>
     </br>
 	{% if contentOfFile.allcommands %}
