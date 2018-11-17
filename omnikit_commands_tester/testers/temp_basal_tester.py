@@ -1,9 +1,13 @@
 import re
 import pathlib
 import requests
-import logging
 
-logger = logging.getLogger(__name__)
+def parser():
+    desc = 'Extract all 1a temp basal commands from Xcode logs and evaluate against PDM temp basals'
+    parser = argparse.ArgumentParser(desc)
+    parser.add_argument(
+        'filename', type=str, help='filename to parse')
+    return parser
 
 
 def get_raw_temp_basals_rtlomni(rtlomni_log_text):
@@ -78,7 +82,7 @@ def reformat_raw_hex(commands_list, command_type, extra_command_type):
                 raw_value[52:56],
                 raw_value[56:64]]
             command = ' '.join(command_elements)
-            #print(command)
+            print(command)
             commands.append(command)
     return commands
 
@@ -99,11 +103,12 @@ def match_temp_basals_pdm(commands, rawgit_page_pdm_values):
     pdm_values = temp_basals_pdm.split('\n')
     mismatch = 0
     for i, command in enumerate(commands):
+        print(command)
         for line in pdm_values:
+            #print(line)
             # Replace reminders by 00 to match Loop
             if line[59:61] != '00':
                     line = line[:59] + '00' + line[61:]
-            error = ''
             unit_rate_pdm = line[:5].strip()
             unit_rate_loop = command[20:25].strip() # command[12:18].strip()
             if unit_rate_loop == unit_rate_pdm:
@@ -115,13 +120,21 @@ def match_temp_basals_pdm(commands, rawgit_page_pdm_values):
                     break
                 if command[47:].strip() != line[27:].strip():
                     match = "No"
+            else:
+                pdm = "This unit value does not match any of the PDM values."
+                match = "No"
         tested_results.append({"pdm": pdm, "loop": command, "match": match})
+        print(pdm)
+        print(command)
+        print(match)
         if match == "No":
                 mismatch += 1
     if mismatch > 0:
         total_results = "Found {} mismatches".format(mismatch)
+
     else:
         total_results = "No Temp basal mismatches found"
+    print(total_results)
     return {"total_results": total_results, "results": tested_results, "header":  "Day....... Time.... "+ pdm_values[1]}
 
 
@@ -136,3 +149,13 @@ def extractor(file):
 
     matching_tempbasals = match_temp_basals_pdm(temp_basal_commands, pdm_values_url)
     return {"allcommands": temp_basal_commands, "matching_tempbasals": matching_tempbasals}
+
+
+def main():
+    args=parser().parse_args()
+    with open(args.filename, 'rb') as input_file:
+        output_json = extractor(input_file)
+
+
+if __name__ == '__main__':
+    main()
