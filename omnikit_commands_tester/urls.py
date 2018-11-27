@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from issuereports.views import tempbasal_tester, DocumentCreateView
+from omnikit_commands_tester.issuereports.views import tempbasal_tester, DocumentCreateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),

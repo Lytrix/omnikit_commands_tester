@@ -4,9 +4,9 @@ from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy
 from django.contrib.staticfiles.templatetags.staticfiles import static
 
-from issuereports.models import Document
+from omnikit_commands_tester.issuereports.models import Document
 from django.views import generic
-from issuereports.temp_basal_tester import extractor
+from omnikit_commands_tester.issuereports.temp_basal_tester import extractor
 
 
 class DocumentCreateView(CreateView):
