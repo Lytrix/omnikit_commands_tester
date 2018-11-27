@@ -16,11 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from omnikit_commands_tester.issuereports.views import tempbasal_tester, DocumentCreateView
+from omnikit_commands_tester.issuereports.views import tempbasal_tester #, DocumentCreateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', tempbasal_tester, name='fileupload'),
-    path('uploads/', DocumentCreateView.as_view(), name='uploads'),
-    path(r'uploads/<upload_id>/', tempbasal_tester, name='upload')
+    # path('uploads/', DocumentCreateView.as_view(), name='uploads'),
+    # path(r'uploads/<upload_id>/', tempbasal_tester, name='upload')
 ]
