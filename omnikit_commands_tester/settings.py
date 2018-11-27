@@ -27,7 +27,7 @@ DEBUG = SECRET_KEY == insecure_secret
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [*]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
