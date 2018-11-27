@@ -6,10 +6,34 @@
 	<form action="#" method="post" enctype="multipart/form-data">
 		<h3>Upload rtlomni (.omni) or xcode logs (.md)</h3>
 		{% csrf_token %}
-		{{ form|crispy }}
+		{{ form.as_p|crispy }}
     	<input type="file" class="btn btn-info" placeholder=".omni, .md" name="myfile" value="Browse"/>
     	<button type="submit" class="btn btn-success"/>Process</button>
 	</form>
+    <div>
+        <table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Uploaded at</th>
+      <th>Size</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for document in documents %}
+      <tr>
+        <td><a href="{{ document.upload.url }}" target="_blank">{{ document.upload.name }}</a></td>
+        <td>{{ document.uploaded_at }}</td>
+        <td>{{ document.upload.size|filesizeformat }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="3">No data.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+    </div>
     </br>
 	{% if contentOfFile.allcommands %}
 		<hr class="mt-0 mb-2">

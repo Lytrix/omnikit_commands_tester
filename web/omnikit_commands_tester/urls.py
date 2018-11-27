@@ -1,4 +1,4 @@
-"""omnipod_commands URL Configuration
+"""mysite URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.1/topics/http/urls/
@@ -15,11 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from django.conf import settings
-from django.conf.urls.static import static
-from omnikit_commands_tester.api.views import tempbasal_tester
+
+from issuereports.views import tempbasal_tester, DocumentCreateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', tempbasal_tester, name='fileupload'),
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('uploads/', DocumentCreateView.as_view(), name='uploads'),
+    path(r'uploads/<upload_id>/', tempbasal_tester, name='upload')
+]

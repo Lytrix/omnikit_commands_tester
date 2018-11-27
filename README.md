@@ -14,6 +14,12 @@ Hit process and it will:
 
 https://github.com/openaps/openomni/wiki/All-Temp-basal-units-for-0.5h
 
+You can also run tester commands in the terminal for example like this:
+```
+cd omnikit_commands_tester/web/issuereports
+python temp_basal_tester.py filename.md tempbasal
+```
+
 ### Install procedure ###
 
 ```

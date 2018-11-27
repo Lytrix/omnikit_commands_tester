@@ -1,5 +1,5 @@
-{% load staticfiles %}
-
+<!--{% load staticfiles %} -->
+{% load static %}
 <!doctype html>
 <html lang="en">
   <head>
@@ -13,7 +13,8 @@
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-12">
-          <h1 class="mt-2">Omnikit Temp Basal Commands Checker</h1>
+          <h1 class="mt-2"><img src="{% static 'img/pod1x.png' %}"> Omnikit Temp Basal Commands Checker</h1>
+          
           <hr class="mt-0 mb-2">
               <body>
                 {% block content %}
