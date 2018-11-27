@@ -1,0 +1,1 @@
+web: gunicorn web.omnikit_commands_tester.wsgi --timeout 120 --keep-alive 5
