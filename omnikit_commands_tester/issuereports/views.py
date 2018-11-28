@@ -6,7 +6,7 @@ from django.shortcuts import render
 
 # from omnikit_commands_tester.issuereports.models import Document
 # from django.views import generic
-from omnikit_commands_tester.issuereports.temp_basal_tester import extractor
+from omnikit_commands_tester.issuereports.set_insulin_comands_tester import extractor
 
 
 # class DocumentCreateView(CreateView):

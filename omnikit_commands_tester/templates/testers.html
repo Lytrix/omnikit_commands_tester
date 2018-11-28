@@ -11,27 +11,28 @@
     	<button type="submit" class="btn btn-success"/>Process</button>
 	</form>
   </br>
-	{% if contentOfFile.allcommands %}
-		<hr class="mt-0 mb-2">
-		<h5>All temp basal insulin commands in: {{file.name}}</h5>
-    	</br>
-    	<code>
-    	{{ contentOfFile.matching_tempbasals.header }}
-        </br>
-    	{% for command in contentOfFile.allcommands %}
-    	  {{ command }}
-    	  </br>
-		{% endfor %}
-		</code>
+  {% for report in contentOfFile %}
+	{% if report.allcommands %}
+    		<hr class="mt-0 mb-2">
+    		<h5>All {{report.command_type}} insulin commands in: {{file.name}}</h5>
+        	</br>
+        	<code>
+        	{{ report.matching_tempbasals.header }}
+            </br>
+        	{% for command in report.allcommands %}
+        	  {{ command }}
+        	  </br>
+    		{% endfor %}
+    		</code>
 	{% endif %}
-	{% if contentOfFile.matching_tempbasals%}
+	{% if report.matching_tempbasals%}
 		<hr class="mt-0 mb-2">
 		<h5>Tested matching PDM commands</h5>
     	</br>
-    	{{ contentOfFile.matching_tempbasals.total_results }}
+    	{{ report.matching_tempbasals.total_results }}
     	<hr class="mt-0 mb-2">
     	<code>
-    	{% for test in contentOfFile.matching_tempbasals.results %}
+    	{% for test in report.matching_tempbasals.results %}
     	  
     	  {{ test.pdm }}
     	  </br>
@@ -42,4 +43,6 @@
 		{% endfor %}
 		</code>
     {% endif %}
+  {% endfor %}
+  
 {% endblock %}
