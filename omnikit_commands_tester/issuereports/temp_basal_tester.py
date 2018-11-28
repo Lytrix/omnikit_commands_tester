@@ -57,12 +57,7 @@ def get_raw_temp_basals_xcode(xcode_log_text, captureDate=date.today()):
 def reformat_raw_hex(commands_list, command_type, captureDate=date.today()):
     print("List of commands:")
     commands = []
-
-    if command_type == "basal":
-        basal = True
-    if command_type == "tempbasal":
-        basal = False
-
+ 
     print("Day        Time     1a LL NNNNNNNN 00 CCCC HH SSSS PPPP napp napp napp napp napp 13 LL RR MM NNNN XXXXXXXX YYYY ZZZZZZZZ YYYY ZZZZZZZZ YYYY ZZZZZZZZ")
     for line in commands_list:
         print(line)
@@ -71,9 +66,10 @@ def reformat_raw_hex(commands_list, command_type, captureDate=date.today()):
 
         #if raw_value[:2] == command_type and raw_value[32:34] == extra_command_type:
         print(raw_value[12:14])
-        if basal and raw_value[12:14] == '1a' and captureDate < date(2018, 11, 26):
+ 
+        if command_type == "basal" and raw_value[12:14] == '1a' and captureDate < date(2018, 11, 26):
             raw_value = ''.join(map(str, raw_value))
-        elif basal and raw_value[12:14] == '1a':
+        elif command_type == "basal" and raw_value[12:14] == '1a':
             raw_value = raw_value[12:]
             raw_value = ''.join(map(str, raw_value))
 
@@ -117,7 +113,7 @@ def reformat_raw_hex(commands_list, command_type, captureDate=date.today()):
             command = ' '.join(command_elements)
             #print(command)
             commands.append(command)
-        if basal == False and raw_value[12:14] == '1a':
+        if command_type == "tempbasal" and raw_value[12:14] == '1a' and raw_value[44:46] == '16':
             raw_value = raw_value[12:]
             raw_value = ''.join(map(str, raw_value))
 
