@@ -38,8 +38,10 @@ def get_raw_temp_basals_xcode(xcode_log_text, captureDate=date.today()):
         returns a list of all raw hex commands
     """
     commands = []
+    key_name = r"Send\(Hex\)"
 
-    if captureDate < date(2018, 11, 26):
+    key_name_present = re.findall(key_name, xcode_log_text)
+    if key_name_present:
         regex = r"Send\(Hex\): .{0,12}(.*)\n([0-9-:\s]*)"
         select_1a_commands = re.findall(regex, xcode_log_text, re.MULTILINE)
         for line in select_1a_commands:
@@ -282,7 +284,7 @@ def extractor(file):
 def main():
     args = parser().parse_args()
     with open(args.filename, 'rb') as input_file:
-        output_json = extractor(input_file, args.command_type)
+        output_json = extractor(input_file)
 
 
 if __name__ == '__main__':
