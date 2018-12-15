@@ -21,7 +21,7 @@ def get_raw_temp_basals_rtlomni(rtlomni_log_text):
     regex = r"(.*)\sID1.*BODY:([0-9A-Za-z]*).*\n.*\n.*CON:([A-Za-z0-9]+)*\s"
     select = re.findall(regex, rtlomni_log_text)
     for line in select:
-        time = ' '.join(line[0][:-4].split('T'))
+        time = ' '.join(line[0][0:19].split('T'))
         string = "{}{}".format(line[1], line[2])
         raw_value = ''.join(map(str, string))
         commands.append({"time": time, "raw_value": raw_value})
