@@ -41,6 +41,7 @@ def get_raw_temp_basals_xcode(xcode_log_text, captureDate=date.today()):
     key_name = r"Send\(Hex\)"
 
     key_name_present = re.findall(key_name, xcode_log_text)
+    print(key_name_present)
     if key_name_present:
         regex = r"Send\(Hex\): .{0,12}(.*)\n([0-9-:\s]*)"
         select_1a_commands = re.findall(regex, xcode_log_text, re.MULTILINE)
@@ -48,11 +49,11 @@ def get_raw_temp_basals_xcode(xcode_log_text, captureDate=date.today()):
             commands.append({"time": line[1], "raw_value": line[0]})
             #print(line)
     else:
-        regex = r"\* ([0-9-:\s]*)\s.*[send,receive]\s([a-z0-9]*)\n"
+        regex = r"\* ([0-9-:\s]*)\s.*\s(send|receive)\s([a-z0-9]*)\n*"
         select_1a_commands = re.findall(regex, xcode_log_text, re.MULTILINE)
         for line in select_1a_commands:
-            commands.append({"time": line[0], "raw_value": line[1][12:]})
-            #print(line)
+            commands.append({"time": line[0], "raw_value": line[2][12:]})
+            print(line)
     return commands
 
 
