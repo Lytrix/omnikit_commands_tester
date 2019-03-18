@@ -222,13 +222,14 @@ def match_temp_basals_pdm(commands, command_type, rawgit_page_pdm_values):
                 pdm_command = line[27:].strip()
 
             if command_type == 'bolus':
-                if line[53:55] != '00':
-                    line = line[:53] + '00' + line[55:]
-                unit_rate_loop = line[:5].strip()
+                unit_rate_loop = command[20:25].strip()
                 loop_command = command[40:].strip()
-                # print(loop_command)
                 pdm_command = line[20:].strip()
-                # print(pdm_command)
+                # Ignore acknowledge/beep setting
+                loop_command = loop_command[:32] + 'XX' + loop_command[34:]
+                pdm_command = pdm_command[:32] + 'XX' + pdm_command[34:]
+                #print(loop_command)
+                #print(pdm_command)
             unit_rate_pdm = line[:5].strip()
 
             if unit_rate_loop == unit_rate_pdm:
@@ -254,7 +255,7 @@ def match_temp_basals_pdm(commands, command_type, rawgit_page_pdm_values):
 
     else:
         total_results = "No {} mismatches found".format(command_type)
-    print(total_results)
+    #print(total_results)
     return {"total_results": total_results, "results": tested_results, "header":  "Day....... Time.... "+ pdm_values[1]}
 
 
@@ -278,7 +279,7 @@ def extractor(file):
         matching_tempbasals = match_temp_basals_pdm(temp_basal_commands, set_insulin_command["command_type"], pdm_values_url)
         reports.append({"command_type": set_insulin_command["command_type"], "allcommands": temp_basal_commands, "matching_tempbasals": matching_tempbasals})
 
-    print(reports)
+    #print(reports)
     return reports
 
 
