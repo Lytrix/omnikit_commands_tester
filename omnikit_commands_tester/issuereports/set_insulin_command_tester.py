@@ -60,7 +60,7 @@ def get_raw_temp_basals_xcode(xcode_log_text, captureDate=date.today()):
 def parse_basal(line):
     raw_value = ''.join(map(str, raw_value))
 
-    # 1a LL NNNNNNNN 00 CCCC HH SSSS PPPP napp napp napp 13 LL RR MM NNNN XXXXXXXX
+    # 1a LL NNNNNNNN 00 CCCC HH SSSS PPPP napp napp napp 13 LL BO MM NNNN XXXXXXXX
     # 1a 12 b92270c2 00 06ba 29 10d8 0009 f01e f01e f01e 13 0e 40 00 0762 004c4b40
 
     command_elements = [
@@ -80,7 +80,7 @@ def parse_basal(line):
         raw_value[44:48],  # napp
         raw_value[48:50],  # 13
         raw_value[50:52],  # LL
-        raw_value[52:54],  # RR
+        raw_value[52:54],  # BO
         raw_value[54:56],  # MM
         raw_value[56:60],  # NNNN
         raw_value[60:68],  # XXXXXXXX
@@ -100,7 +100,7 @@ def parse_basal(line):
 def parse_immediate_bolus(line):
     raw_value = line["raw_value"]
 
-    #              1a LL NNNNNNNN 02 CCCC HH SSSS PPPP 0ppp 17 LL RR NNNN XXXXXXXX YYYY ZZZZZZZZ
+    #              1a LL NNNNNNNN 02 CCCC HH SSSS PPPP 0ppp 17 LL BO NNNN XXXXXXXX YYYY ZZZZZZZZ
     # 1f0bb35e0c1f 1a 0e 08f56c71 02 00b5 01 00a0 000a 000a 17 0d 00 0064 00030d40 0000 00000000 02f3
 
     if raw_value[38:42]:
@@ -171,7 +171,7 @@ def reformat_raw_hex(commands_list, command_type, captureDate=date.today()):
     print("List of commands:")
     commands = []
     if command_type == "bolus":
-        print("Day        Time     Unit 1a LL NNNNNNNN 02 CCCC HH SSSS PPPP 0ppp 17 LL RR NNNN XXXXXXXX YYYY ZZZZZZZZ")
+        print("Day        Time     Unit 1a LL NNNNNNNN 02 CCCC HH SSSS PPPP 0ppp 17 LL BO NNNN XXXXXXXX YYYY ZZZZZZZZ")
         for line in commands_list:
             raw_value = line["raw_value"]
             if raw_value[0:2] == '1a' and raw_value[32:34] == '17':
@@ -180,7 +180,7 @@ def reformat_raw_hex(commands_list, command_type, captureDate=date.today()):
                 continue
             commands.append(command)
     if command_type == "tempbasal":
-        print("Day        Time     1a LL NNNNNNNN 00 CCCC HH SSSS PPPP napp napp napp napp napp 13 LL RR MM NNNN XXXXXXXX YYYY ZZZZZZZZ YYYY ZZZZZZZZ YYYY ZZZZZZZZ")   
+        print("Day        Time     1a LL NNNNNNNN 00 CCCC HH SSSS PPPP napp napp napp napp napp 13 LL BO MM NNNN XXXXXXXX YYYY ZZZZZZZZ YYYY ZZZZZZZZ YYYY ZZZZZZZZ")   
         for line in commands_list:
             raw_value = line["raw_value"]
             #print(line)
