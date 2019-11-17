@@ -4,6 +4,8 @@ import requests
 from urllib import parse
 import argparse
 from datetime import date
+from bitstring import BitArray
+from textwrap import wrap
 
 
 def parser():
@@ -12,7 +14,7 @@ def parser():
     parser.add_argument(
         'filename', type=str, help='filename to parse')
     parser.add_argument(
-        'command_type', type=str, help='extra command to parse, for example bolus, basal, tempbasal')
+        'command_type', type=str, help='extra command to parse, for example bolus, basal, tempbasal, flashlogs')
     return parser
 
 
@@ -167,6 +169,52 @@ def parse_temp_basal(line):
     return command
 
 
+def dword2bits(dword, log_number):
+    """
+    print dword as bits
+    args:
+        32 bit dword as string, for example: '51213e00'
+    output:
+        bits
+    """
+    c = BitArray(hex=dword)
+    bits = c.bin
+    #print(f'Log #: DWORD {dword}')
+    # print('pulse eeeeee0a pppliiib cccccccc dfgggggg')
+    bit_string = ' {} {}'.format(str(log_number).zfill(5), ' '.join(wrap(bits, 8)))
+    # print(bit_string)
+    return bit_string
+
+
+def split_dwords(hex_string):
+    """
+    Remove type and pulse count, and crc at end of string
+    Return 8 character elements in list
+    """
+    dwords_string = hex_string[10:-4]
+    dwords = wrap(dwords_string, 8)
+    return dwords
+
+
+def parse_flashlogs(flash_logs):
+    """
+    Merge type 51 and type 50 logs
+    Print list of logs as pulse number and bits
+    """
+    last_log_number = int(flash_logs['type_50'][6:10], 16)
+    commands = []
+    dwords = []
+    for flash_type, logs in flash_logs.items():
+        dwords.extend(split_dwords(logs))
+    print(dwords)
+    # print('pulse eeeeee0a pppliiib cccccccc dfgggggg')
+    for i, dword in enumerate(dwords):
+        log_number = last_log_number-100+i+1
+        commands.append({"log": dword2bits(dword, log_number)})
+    print(commands)
+    return commands
+
+
 def reformat_raw_hex(commands_list, command_type, captureDate=date.today()):
     print("List of commands:")
     commands = []
@@ -193,6 +241,23 @@ def reformat_raw_hex(commands_list, command_type, captureDate=date.today()):
             else:
                 continue
             commands.append(command)
+    if command_type == "flashlogs":
+        flash_logs = {}
+        print("Pulse eeeeee0a pppliiib cccccccc dfgggggg")
+        for line in commands_list:
+            raw_value = line["raw_value"]
+            # print(raw_value)
+            if raw_value[0:2] == '02' and raw_value[4:6] == '51':
+                print("found type 51")
+                flash_logs["type_51"] = raw_value
+            if raw_value[0:2] == '02' and raw_value[4:6] == '50':
+                print("found type 50")
+                flash_logs["type_50"] = raw_value
+            else:
+                continue
+        if flash_logs["type_51"] and flash_logs["type_50"]:
+            command = parse_flashlogs(flash_logs)
+            commands.extend(command)
     return commands
 
 
@@ -278,9 +343,12 @@ def extractor(file):
         pdm_values_url = parse.urljoin(wiki_url, set_insulin_command["wiki_page"])
         temp_basal_commands = reformat_raw_hex(all_commands, set_insulin_command["command_type"])
         matching_tempbasals = match_temp_basals_pdm(temp_basal_commands, set_insulin_command["command_type"], pdm_values_url)
-        reports.append({"command_type": set_insulin_command["command_type"], "allcommands": temp_basal_commands, "matching_tempbasals": matching_tempbasals})
-
-    #print(reports)
+        reports.append({"command_type": set_insulin_command["command_type"],
+                        "allcommands": temp_basal_commands,
+                        "matching_tempbasals": matching_tempbasals})
+    flash_logs = reformat_raw_hex(all_commands, 'flashlogs')
+    reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse eeeeee0a pppliiib cccccccc dfgggggg"}})
+    print(reports)
     return reports
 
 
