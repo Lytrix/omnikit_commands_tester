@@ -169,6 +169,13 @@ def parse_temp_basal(line):
     return command
 
 
+def twos_complement(hexstr, bits):
+    value = int(hexstr,16)
+    if value & (1 << (bits-1)):
+        value -= 1 << bits
+    return value
+
+
 def dword2bits(dword, log_number):
     """
     print dword as bits
@@ -181,8 +188,54 @@ def dword2bits(dword, log_number):
     bits = c.bin
     #print(f'Log #: DWORD {dword}')
     # print('pulse eeeeee0a pppliiib cccccccc dfgggggg')
-    bit_string = ' {} {}'.format(str(log_number).zfill(5), ' '.join(wrap(bits, 8)))
-    # print(bit_string)
+    encoder_count = int(hex(int(bits[0:6], 2)), 16)
+    if bits[7:8] == '1':
+        load = "LOAD2"
+    if bits[7:8] == '0':
+        load = "LOAD1"
+    commands = [
+            '.no pulse',
+            '. . basal',
+            'tempbasal',
+            '. . bolus',
+            'ext bolus'
+            ]
+    ppp = int(bits[8:11], 2)
+    print(commands[ppp])
+
+    reservoir = ["> 50U", "<=50U"]
+    print(reservoir[int(bits[11:12], 2)])
+
+    bolus_tick = int(bits[12:15], 2)
+    print("bolus tick {}".format(bolus_tick))
+    # print(bits[16:24])
+    w0 = int(hex(int(bits[16:24], 2)),16) << 1 + int(bits[15:16])
+    print("w0: ", str(w0))
+    byte_27B = int(bits[24:25])
+    print("27B: ", byte_27B)
+    byte_B96 = int(bits[25:26])
+    print("B96: ", byte_B96)
+    last_encoder_value = twos_complement(hex(int(bits[26:32], 2)), 6)
+    # last_encoder_value = twos_complement(hex(int('111111', 2)), 6)
+    print("last encoder value:", last_encoder_value)
+    items = [
+        str(log_number).zfill(5),
+        '|',
+        ' '.join(wrap(bits, 8)),
+        '|',
+        str(encoder_count).zfill(2),
+        load,
+        commands[ppp],
+        reservoir[int(bits[11:12], 2)],
+        str(bolus_tick),
+        str(w0),
+        '.      {}'.format(byte_27B),
+        '.      {}'.format(byte_B96),
+        str(last_encoder_value)
+        ]
+    bit_string = ' '.join(items)
+    print("encoder count: {}".format(encoder_count))
+    print("load: {}".format(load))
     return bit_string
 
 
@@ -201,16 +254,24 @@ def parse_flashlogs(flash_logs):
     Merge type 51 and type 50 logs
     Print list of logs as pulse number and bits
     """
-    last_log_number = int(flash_logs['type_50'][6:10], 16)
+    last_log_number = int(flash_logs['50'][6:10], 16)
+    print('Last pulse: ',last_log_number)
     commands = []
-    dwords = []
     for flash_type, logs in flash_logs.items():
+        dwords = []
+        logtypeset = {"type": flash_type, "logs": []}
         dwords.extend(split_dwords(logs))
-    print(dwords)
-    # print('pulse eeeeee0a pppliiib cccccccc dfgggggg')
-    for i, dword in enumerate(dwords):
-        log_number = last_log_number-100+i+1
-        commands.append({"log": dword2bits(dword, log_number)})
+        # print(dwords)
+        # print(logtypeset)
+        # print('pulse eeeeee0a pppliiib cccccccc dfgggggg')
+        for i, dword in enumerate(dwords):
+            if flash_type == '51':
+                log_number = last_log_number-100+i+1
+            if flash_type == '50':
+                log_number = last_log_number-50+i+1
+            logtypeset["logs"].append({"log": dword2bits(dword, log_number)})
+        logtypeset["logs"] = logtypeset["logs"][::-1]
+        commands.append(logtypeset)
     print(commands)
     return commands
 
@@ -249,13 +310,13 @@ def reformat_raw_hex(commands_list, command_type, captureDate=date.today()):
             # print(raw_value)
             if raw_value[0:2] == '02' and raw_value[4:6] == '51':
                 print("found type 51")
-                flash_logs["type_51"] = raw_value
+                flash_logs["51"] = raw_value
             if raw_value[0:2] == '02' and raw_value[4:6] == '50':
                 print("found type 50")
-                flash_logs["type_50"] = raw_value
+                flash_logs["50"] = raw_value
             else:
                 continue
-        if flash_logs["type_51"] and flash_logs["type_50"]:
+        if flash_logs["51"] and flash_logs["50"]:
             command = parse_flashlogs(flash_logs)
             commands.extend(command)
     return commands
@@ -347,7 +408,7 @@ def extractor(file):
                         "allcommands": temp_basal_commands,
                         "matching_tempbasals": matching_tempbasals})
     flash_logs = reformat_raw_hex(all_commands, 'flashlogs')
-    reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse eeeeee0a pppliiib cccccccc dfgggggg"}})
+    reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | ct LOAD# pulsetype rsrvr b .w0 27B B96 last encoder value"}})
     print(reports)
     return reports
 

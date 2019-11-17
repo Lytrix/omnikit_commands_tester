@@ -48,12 +48,21 @@
         <h5>Flash logs (Type 51+50)</h5>
         </br>
         <hr class="mt-0 mb-2">
+        
         <code>
-        {{ report.flashlogs.header }}
-        </br>
-        {% for logs in report.flashlogs.results %}
-          {{ logs.log }}
-          </br>
+        {% for logtype in report.flashlogs.results %}
+            </br>
+            Type {{ logtype.type }}
+            <hr class="mt-0 mb-2">
+            </br>
+            {{ report.flashlogs.header }}
+            </br>
+            {% for logs in logtype.logs %}
+                {{ logs.log }}
+                </br>
+            {% endfor %}
+            {{ report.flashlogs.header }}
+            </br>
         {% endfor %}
         </code>
     {% endif %}
