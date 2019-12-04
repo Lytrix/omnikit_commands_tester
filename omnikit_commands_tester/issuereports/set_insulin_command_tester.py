@@ -202,6 +202,7 @@ def dword2bits(dword, log_number):
             ]
     ppp = int(bits[8:11], 2)
     print(commands[ppp])
+    iii = int(bits[13:16], 2)
 
     reservoir = int(bits[11:12], 2)
     print(reservoir)
@@ -226,6 +227,7 @@ def dword2bits(dword, log_number):
         str(encoder_count).zfill(2),
         load,
         commands[ppp],
+        str(iii),
         str(reservoir),
         # str(bolus_tick),
         str(w0).zfill(3),
@@ -425,7 +427,7 @@ def extractor(file):
                         "allcommands": temp_basal_commands,
                         "matching_tempbasals": matching_tempbasals})
     flash_logs = reformat_raw_hex(all_commands, 'flashlogs')
-    reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | ct LOAD# pulsetype f .w0 27B B96 last encoder value"}})
+    reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | ct LOAD# pulsetype i f .w0 27B B96 last encoder value"}})
     # print(reports)
     return reports
 
