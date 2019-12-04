@@ -50,20 +50,16 @@
         <hr class="mt-0 mb-2">
         
         <code>
-        {% for logtype in report.flashlogs.results %}
+        {{ report.flashlogs.header }}
+        {% for pulses in report.flashlogs.results %}
             </br>
-            Type {{ logtype.type }}
-            <hr class="mt-0 mb-2">
+            {% for pulse in pulses|dictsort:'log' %}
+                {{ pulse.log }}
             </br>
-            {{ report.flashlogs.header }}
-            </br>
-            {% for logs in logtype.logs %}
-                {{ logs.log }}
-                </br>
             {% endfor %}
-            {{ report.flashlogs.header }}
             </br>
         {% endfor %}
+        {{ report.flashlogs.header }}
         </code>
     {% endif %}
   {% endfor %}

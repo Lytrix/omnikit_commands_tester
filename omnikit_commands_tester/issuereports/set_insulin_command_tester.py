@@ -130,7 +130,7 @@ def parse_immediate_bolus(line):
         raw_value[54:62],  # ZZZZZZZZ
         ]
     command = ' '.join(command_elements)
-    print(command)
+    # print(command)
     return command
 
 
@@ -203,8 +203,8 @@ def dword2bits(dword, log_number):
     ppp = int(bits[8:11], 2)
     print(commands[ppp])
 
-    reservoir = ["> 50U", "<=50U"]
-    print(reservoir[int(bits[11:12], 2)])
+    reservoir = int(bits[11:12], 2)
+    print(reservoir)
 
     bolus_tick = int(bits[12:15], 2)
     print("bolus tick {}".format(bolus_tick))
@@ -226,9 +226,9 @@ def dword2bits(dword, log_number):
         str(encoder_count).zfill(2),
         load,
         commands[ppp],
-        reservoir[int(bits[11:12], 2)],
-        str(bolus_tick),
-        str(w0),
+        str(reservoir),
+        # str(bolus_tick),
+        str(w0).zfill(3),
         '.      {}'.format(byte_27B),
         '.      {}'.format(byte_B96),
         str(last_encoder_value)
@@ -254,25 +254,33 @@ def parse_flashlogs(flash_logs):
     Merge type 51 and type 50 logs
     Print list of logs as pulse number and bits
     """
-    last_log_number = int(flash_logs['50'][6:10], 16)
-    print('Last pulse: ',last_log_number)
     commands = []
-    for flash_type, logs in flash_logs.items():
-        dwords = []
-        logtypeset = {"type": flash_type, "logs": []}
-        dwords.extend(split_dwords(logs))
-        # print(dwords)
-        # print(logtypeset)
-        # print('pulse eeeeee0a pppliiib cccccccc dfgggggg')
-        for i, dword in enumerate(dwords):
-            if flash_type == '51':
-                log_number = last_log_number-100+i+1
-            if flash_type == '50':
-                log_number = last_log_number-50+i+1
-            logtypeset["logs"].append({"log": dword2bits(dword, log_number)})
-        logtypeset["logs"] = logtypeset["logs"][::-1]
-        commands.append(logtypeset)
-    print(commands)
+    pulse_string = []
+    pulses = []
+    for flash_pair in flash_logs:
+        last_log_number = int(flash_pair['50'][6:10], 16)
+        print('Last pulse: ', last_log_number)
+        for flash_type, logs in flash_pair.items():
+            dwords = []
+            dwords.extend(split_dwords(logs))
+            print(dwords)
+            # print(logtypeset)
+            print('pulse eeeeee0a pppliiib cccccccc dfgggggg')
+            for i, dword in enumerate(dwords):
+                if flash_type == '51':
+                    pulse = last_log_number-100+i+1
+                if flash_type == '50':
+                    pulse = last_log_number-50+i+1
+                if len(pulses) == 0:
+                    pulses.append({"pulse": pulse, "dword": dword})
+                else:
+                    print([pulse["pulse"] for pulse in pulses])
+                    if pulse not in [pulse["pulse"] for pulse in pulses]:
+                        pulses.append({"pulse": pulse, "dword": dword})
+    for pulse in pulses:
+        pulse_string.append({"log": dword2bits(pulse["dword"], pulse["pulse"])})
+    print(sorted(pulse_string, key=lambda i: i['log']))
+    commands.append(pulse_string)
     return commands
 
 
@@ -303,22 +311,31 @@ def reformat_raw_hex(commands_list, command_type, captureDate=date.today()):
                 continue
             commands.append(command)
     if command_type == "flashlogs":
-        flash_logs = {}
+        flash_logs = []
+        flash_pair = {}
         print("Pulse eeeeee0a pppliiib cccccccc dfgggggg")
         for line in commands_list:
             raw_value = line["raw_value"]
             # print(raw_value)
-            if raw_value[0:2] == '02' and raw_value[4:6] == '51':
-                print("found type 51")
-                flash_logs["51"] = raw_value
             if raw_value[0:2] == '02' and raw_value[4:6] == '50':
                 print("found type 50")
-                flash_logs["50"] = raw_value
+                flash_pair["50"] = raw_value
+            if raw_value[0:2] == '02' and raw_value[4:6] == '51':
+                print("found type 51")
+                flash_pair["51"] = raw_value
             else:
                 continue
-        if flash_logs["51"] and flash_logs["50"]:
-            command = parse_flashlogs(flash_logs)
-            commands.extend(command)
+            if flash_pair["51"] and flash_pair["50"]:
+                print("Flash logs found:")
+                print(flash_pair)
+                flash_logs.append(flash_pair)
+                flash_pair = {}
+        #print("total flash_logs")
+        # print(flash_logs)
+        command = parse_flashlogs(flash_logs)
+        print("flashcommand")
+        print(command)
+        commands.extend(command)
     return commands
 
 
@@ -408,8 +425,8 @@ def extractor(file):
                         "allcommands": temp_basal_commands,
                         "matching_tempbasals": matching_tempbasals})
     flash_logs = reformat_raw_hex(all_commands, 'flashlogs')
-    reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | ct LOAD# pulsetype rsrvr b .w0 27B B96 last encoder value"}})
-    print(reports)
+    reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | ct LOAD# pulsetype f .w0 27B B96 last encoder value"}})
+    # print(reports)
     return reports
 
 
