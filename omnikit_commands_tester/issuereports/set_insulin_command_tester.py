@@ -202,7 +202,6 @@ def dword2bits(dword, log_number):
             ]
     ppp = int(bits[8:11], 2)
     print(commands[ppp])
-    iii = int(bits[13:16], 2)
 
     reservoir = int(bits[11:12], 2)
     print(reservoir)
@@ -227,7 +226,7 @@ def dword2bits(dword, log_number):
         str(encoder_count).zfill(2),
         load,
         commands[ppp],
-        str(iii),
+        str(bolus_tick),
         str(reservoir),
         # str(bolus_tick),
         str(w0).zfill(3),
