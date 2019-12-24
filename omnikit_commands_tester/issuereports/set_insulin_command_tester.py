@@ -440,7 +440,12 @@ def extractor(file):
                         "allcommands": temp_basal_commands,
                         "matching_tempbasals": matching_tempbasals})
     flash_logs = reformat_raw_hex(all_commands, 'flashlogs')
-    reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | ct LOAD# pulsetype i f .w0 27B B96 last encoder value"}})
+    print("TEST")
+    print(flash_logs)
+    if len(flash_logs[0]) > 1:
+        reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | ct LOAD# pulsetype i f .w0 27B B96 last encoder value"}})
+    else:
+        reports.append({"flashlogs": {"results": [[{"log": 'No Read Pulse Log commands found'}]], "header": ""}})
     # print(reports)
     return reports
 
