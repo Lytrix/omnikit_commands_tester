@@ -260,18 +260,25 @@ def parse_flashlogs(flash_logs):
     pulses = []
     for flash_pair in flash_logs:
         last_log_number = int(flash_pair['50'][6:10], 16)
-        print('Last pulse: ', last_log_number)
+        for flash_type, logs in flash_pair.items():
+            if flash_type == "50":
+                dwords = []
+                dwords.extend(split_dwords(logs))
+                pulses_50 = len(dwords) 
         for flash_type, logs in flash_pair.items():
             dwords = []
             dwords.extend(split_dwords(logs))
             print(dwords)
-            # print(logtypeset)
             print('pulse eeeeee0a pppliiib cccccccc dfgggggg')
             for i, dword in enumerate(dwords):
+                print("nr: ",i)
                 if flash_type == '51':
-                    pulse = last_log_number-100+i+1
+                    pulse = last_log_number-pulses_50-len(dwords)+i+1
+                    print(pulse)
                 if flash_type == '50':
-                    pulse = last_log_number-50+i+1
+                    print('Last pulse: ', last_log_number)
+                    pulse = last_log_number-pulses_50+i+1
+                    print(pulse)
                 if len(pulses) == 0:
                     pulses.append({"pulse": pulse, "dword": dword})
                 else:
@@ -317,22 +324,29 @@ def reformat_raw_hex(commands_list, command_type, captureDate=date.today()):
         print("Pulse eeeeee0a pppliiib cccccccc dfgggggg")
         for line in commands_list:
             raw_value = line["raw_value"]
-            # print(raw_value)
+            print(raw_value)
             if raw_value[0:2] == '02' and raw_value[4:6] == '50':
                 print("found type 50")
-                flash_pair["50"] = raw_value
+                if flash_pair.get("51") and flash_pair.get("50"):
+                    print("Flash logs found:")
+                    print(flash_pair)
+                    flash_logs.append(flash_pair)
+                    flash_pair = {}
+                    flash_pair["50"] = raw_value
+                else:
+                    flash_pair["50"] = raw_value
             if raw_value[0:2] == '02' and raw_value[4:6] == '51':
                 print("found type 51")
                 flash_pair["51"] = raw_value
             else:
                 continue
-            if flash_pair["51"] and flash_pair["50"]:
-                print("Flash logs found:")
-                print(flash_pair)
-                flash_logs.append(flash_pair)
-                flash_pair = {}
-        #print("total flash_logs")
-        # print(flash_logs)
+        if flash_pair.get("51") and flash_pair.get("50"):
+            print("Flash logs found:")
+            print(flash_pair)
+            flash_logs.append(flash_pair)
+            flash_pair = {}
+        print("total flash_logs")
+        print(flash_logs)
         command = parse_flashlogs(flash_logs)
         print("flashcommand")
         print(command)
