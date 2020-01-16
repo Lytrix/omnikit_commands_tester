@@ -443,7 +443,8 @@ def extractor(file):
     print("TEST")
     print(flash_logs)
     if len(flash_logs[0]) > 1:
-        reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | ct LOAD# pulsetype i f .w0 27B B96 last encoder value"}})
+        reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | CT LOAD# PulseType l I LCV d f Val"
+        }})
     else:
         reports.append({"flashlogs": {"results": [[{"log": 'No Read Pulse Log commands found'}]], "header": ""}})
     # print(reports)
