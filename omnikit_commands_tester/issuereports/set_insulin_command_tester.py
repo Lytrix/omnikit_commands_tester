@@ -189,15 +189,15 @@ def dword2bits(dword, log_number):
     #print(f'Log #: DWORD {dword}')
     # print('pulse eeeeee0a pppliiib cccccccc dfgggggg')
     encoder_count = int(hex(int(bits[0:6], 2)), 16)
-    if bits[7:8] == '1':
+    if bits[7:8] == '+1':
         load = "LOAD2"
-    if bits[7:8] == '0':
+    if bits[7:8] == '.0':
         load = "LOAD1"
     commands = [
             '.no pulse',
-            '. . basal',
+            '. basal .',
             'tempbasal',
-            '. . bolus',
+            '. bolus .',
             'ext bolus'
             ]
     ppp = int(bits[8:11], 2)
