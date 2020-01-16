@@ -230,8 +230,8 @@ def dword2bits(dword, log_number):
         str(reservoir),
         # str(bolus_tick),
         str(w0).zfill(3),
-        '.      {}'.format(byte_27B),
-        '.      {}'.format(byte_B96),
+        str(byte_27B),
+        str(byte_B96),
         str(last_encoder_value)
         ]
     bit_string = ' '.join(items)
