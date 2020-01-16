@@ -216,6 +216,10 @@ def dword2bits(dword, log_number):
     byte_B96 = int(bits[25:26])
     print("B96: ", byte_B96)
     last_encoder_value = twos_complement(hex(int(bits[26:32], 2)), 6)
+    if str(last_encoder_value) == '1':
+        last_encoder_value = '+1'
+    else :
+        last_encoder_value = str(last_encoder_value)
     # last_encoder_value = twos_complement(hex(int('111111', 2)), 6)
     print("last encoder value:", last_encoder_value)
     items = [
@@ -232,7 +236,7 @@ def dword2bits(dword, log_number):
         str(w0).zfill(3),
         str(byte_27B),
         str(byte_B96),
-        str(last_encoder_value)
+        last_encoder_value
         ]
     bit_string = ' '.join(items)
     print("encoder count: {}".format(encoder_count))
