@@ -289,8 +289,12 @@ def parse_flashlogs(flash_logs):
                     print([pulse["pulse"] for pulse in pulses])
                     if pulse not in [pulse["pulse"] for pulse in pulses]:
                         pulses.append({"pulse": pulse, "dword": dword})
-    for pulse in pulses:
+    previous_pulse = 0
+    for pulse in sorted(pulses, key=lambda i: i['pulse']):
+        if pulse["pulse"] != previous_pulse + 1:
+            pulse_string.append({"log": "{} | ........ ........ ........ ........ | .. ..... ......... . . ... . . ..".format(str(previous_pulse  + 1).zfill(5))})
         pulse_string.append({"log": dword2bits(pulse["dword"], pulse["pulse"])})
+        previous_pulse = pulse["pulse"]
     print(sorted(pulse_string, key=lambda i: i['log']))
     commands.append(pulse_string)
     return commands
