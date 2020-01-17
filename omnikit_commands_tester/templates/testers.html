@@ -48,15 +48,14 @@
         <h5>Pulse Log entries</h5>
         </br>
         <hr class="mt-0 mb-2">
-        
         <code>
-        {{ report.flashlogs.header }}
-        {% for pulses in report.flashlogs.results %}
-            </br>
-            {% for pulse in pulses|dictsort:'log' %}
-                {{ pulse.log }}
-            </br>
-            {% endfor %}
+        {% for pulse_set in report.flashlogs.results %}
+            {{ report.flashlogs.header }}
+                </br>
+                {% for pulse in pulse_set|dictsort:'log' %}
+                    {{ pulse.log }}
+                </br>
+                {% endfor %}
             </br>
         {% endfor %}
         {{ report.flashlogs.header }}
