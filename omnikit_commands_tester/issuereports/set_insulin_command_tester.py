@@ -170,7 +170,7 @@ def parse_temp_basal(line):
 
 
 def twos_complement(hexstr, bits):
-    value = int(hexstr,16)
+    value = int(hexstr, 16)
     if value & (1 << (bits-1)):
         value -= 1 << bits
     return value
@@ -203,14 +203,14 @@ def dword2bits(dword, log_number):
     ppp = int(bits[8:11], 2)
     print(commands[ppp])
 
-    reservoir = int(bits[11:12], 2)
+    reservoir = int(bits[11:12])
     print(reservoir)
-
     bolus_tick = int(bits[12:15], 2)
     print("bolus tick {}".format(bolus_tick))
-    # print(bits[16:24])
-    w0 = int(hex(int(bits[16:24], 2)),16) << 1 + int(bits[15:16])
+    print(bits[16:24])
+    w0 = int(hex(int(bits[16:24], 2) << 1), 16) + int(bits[15:16])
     print("w0: ", str(w0))
+    print("b: ", str(int(bits[15:16])))
     byte_27B = int(bits[24:25])
     print("27B: ", byte_27B)
     byte_B96 = int(bits[25:26])
@@ -218,8 +218,10 @@ def dword2bits(dword, log_number):
     last_encoder_value = twos_complement(hex(int(bits[26:32], 2)), 6)
     if str(last_encoder_value) == '1':
         last_encoder_value = '+1'
-    else :
-        last_encoder_value = str(last_encoder_value)
+    else:
+        last_encoder_value = '{}'.format(str(last_encoder_value))
+    if str(last_encoder_value) == '0':
+        last_encoder_value = ' {}'.format(str(last_encoder_value))
     # last_encoder_value = twos_complement(hex(int('111111', 2)), 6)
     print("last encoder value:", last_encoder_value)
     items = [
@@ -230,8 +232,8 @@ def dword2bits(dword, log_number):
         str(encoder_count).zfill(2),
         load,
         commands[ppp],
-        str(bolus_tick),
         str(reservoir),
+        str(bolus_tick),
         # str(bolus_tick),
         str(w0).zfill(3),
         str(byte_27B),
@@ -275,7 +277,7 @@ def parse_flashlogs(flash_logs):
             print(dwords)
             print('pulse eeeeee0a pppliiib cccccccc dfgggggg')
             for i, dword in enumerate(dwords):
-                print("nr: ",i)
+                print("nr: ", i)
                 if flash_type == '51':
                     pulse = last_log_number-pulses_50-len(dwords)+i+1
                     print(pulse)
@@ -290,13 +292,20 @@ def parse_flashlogs(flash_logs):
                     if pulse not in [pulse["pulse"] for pulse in pulses]:
                         pulses.append({"pulse": pulse, "dword": dword})
     previous_pulse = 0
+    pulse_set = []
+    i = 0
     for pulse in sorted(pulses, key=lambda i: i['pulse']):
         if pulse["pulse"] != previous_pulse + 1:
-            pulse_string.append({"log": "{} | ........ ........ ........ ........ | .. ..... ......... . . ... . . ..".format(str(previous_pulse  + 1).zfill(5))})
-        pulse_string.append({"log": dword2bits(pulse["dword"], pulse["pulse"])})
+            #pulse_string.append({"log": "{} | no pulse entries recorded ...".format(str(previous_pulse + 1).zfill(5))})
+            #pulse_string.append({"log": "{} | eeeeee0a pppliiib cccccccc dfgggggg | CT LOAD# PulseType l I LCV d f Val".format(str(pulse["pulse"] - 1).zfill(5))})
+            commands.append(pulse_set)
+            pulse_set = []
+            pulse_set.append({"log": dword2bits(pulse["dword"], pulse["pulse"])})
+        else:
+            pulse_set.append({"log": dword2bits(pulse["dword"], pulse["pulse"])})
         previous_pulse = pulse["pulse"]
-    print(sorted(pulse_string, key=lambda i: i['log']))
-    commands.append(pulse_string)
+    # print(sorted(pulse_set, key=lambda i: i['log']))
+    commands.append(pulse_set)
     return commands
 
 
@@ -450,7 +459,7 @@ def extractor(file):
     flash_logs = reformat_raw_hex(all_commands, 'flashlogs')
     print("TEST")
     print(flash_logs)
-    if len(flash_logs[0]) > 1:
+    if len(flash_logs) > 0:
         reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | CT LOAD# PulseType l I LCV d f Val"
         }})
     else:
