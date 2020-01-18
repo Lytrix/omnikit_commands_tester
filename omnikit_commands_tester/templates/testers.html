@@ -13,24 +13,20 @@
   </br>
   {% for report in contentOfFile %}
 	{% if report.allcommands %}
-    		<hr class="mt-0 mb-2">
-    		<h5>All {{report.command_type}} insulin commands in: {{file.name}}</h5>
-        	</br>
+    		<h5>All {{report.command_type}} commands</h5>
         	<code>
-        	{{ report.matching_tempbasals.header }}
-            </br>
-        	{% for command in report.allcommands %}
-        	  {{ command }}
-        	  </br>
-    		{% endfor %}
+        	    {{ report.matching_tempbasals.header }}
+                </br>
+        	    {% for command in report.allcommands %}
+        	       {{ command }}
+        	       </br>
+    		    {% endfor %}
     		</code>
 	{% endif %}
 	{% if report.matching_tempbasals%}
-		<hr class="mt-0 mb-2">
-		<h5>Tested matching PDM commands</h5>
     	</br>
-    	{{ report.matching_tempbasals.total_results }}
-    	<hr class="mt-0 mb-2">
+        {{ report.matching_tempbasals.total_results }}
+        </br>
     	<code>
     	{% for test in report.matching_tempbasals.results %}
     	  {% if test.match %}
@@ -47,8 +43,6 @@
     {% if report.flashlogs%}
         <hr class="mt-0 mb-2">
         <h5>Pulse Log entries</h5>
-        </br>
-        <hr class="mt-0 mb-2">
         <code>
         {% for pulse_set in report.flashlogs.results %}
             {{ report.flashlogs.header }}
