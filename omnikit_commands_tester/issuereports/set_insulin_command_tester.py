@@ -417,10 +417,11 @@ def match_temp_basals_pdm(commands, command_type, rawgit_page_pdm_values):
                     break
                 if loop_command != pdm_command:
                     match = "No"
+                    tested_results.append({"pdm": pdm, "loop": command, "match": match})
             else:
                 pdm = "This unit value does not match any of the PDM values."
                 match = "No"
-        tested_results.append({"pdm": pdm, "loop": command, "match": match})
+        tested_results.append({"loop": command})
         print(pdm)
         print(command)
         print(match)
