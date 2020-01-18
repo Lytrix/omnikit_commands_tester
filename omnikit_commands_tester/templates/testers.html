@@ -33,13 +33,14 @@
     	<hr class="mt-0 mb-2">
     	<code>
     	{% for test in report.matching_tempbasals.results %}
-    	  
-    	  {{ test.pdm }}
-    	  </br>
-    	  {{ test.loop }}
-    	  </br>
-    	  match: {{ test.match }}
-    	  </br>
+    	  {% if test.match %}
+            {{ test.pdm }}
+            </br>
+            {{ test.loop }}
+            </br>
+            match: {{ test.match }}
+            </br>
+          {% endif %}
 		{% endfor %}
 		</code>
     {% endif %}
@@ -51,11 +52,11 @@
         <code>
         {% for pulse_set in report.flashlogs.results %}
             {{ report.flashlogs.header }}
+            </br>
+            {% for pulse in pulse_set|dictsort:'log' %}
+                {{ pulse.log }}
                 </br>
-                {% for pulse in pulse_set|dictsort:'log' %}
-                    {{ pulse.log }}
-                </br>
-                {% endfor %}
+            {% endfor %}
             </br>
         {% endfor %}
         {{ report.flashlogs.header }}
