@@ -418,6 +418,7 @@ def match_temp_basals_pdm(commands, command_type, rawgit_page_pdm_values):
                 if loop_command != pdm_command:
                     match = "No"
                     tested_results.append({"pdm": pdm, "loop": command, "match": match})
+                    mismatch += 1
             else:
                 pdm = "This unit value does not match any of the PDM values."
                 match = "No"
@@ -425,8 +426,7 @@ def match_temp_basals_pdm(commands, command_type, rawgit_page_pdm_values):
         print(pdm)
         print(command)
         print(match)
-        if match == "No":
-                mismatch += 1
+
     if mismatch > 0:
         total_results = "Found {} mismatches".format(mismatch)
 
