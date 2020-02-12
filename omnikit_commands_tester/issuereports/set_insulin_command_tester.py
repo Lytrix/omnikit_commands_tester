@@ -384,29 +384,26 @@ def match_temp_basals_pdm(commands, command_type, rawgit_page_pdm_values):
     input_data_text = requests.get(rawgit_page_pdm_values).text
     temp_basals_pdm = re.search(r"```(.*)```", input_data_text, re.DOTALL)
     pdm_values = temp_basals_pdm.group(1).split('\n')
+    print("PDMVALUES")
+    print(pdm_values)
     mismatch = 0
     for i, command in enumerate(commands):
         for line in pdm_values:
             # print(line)
-            # Replace reminders to 00 to match Loop
             if command_type == 'tempbasal':
-                #if line[59:61] != '00':
-                #    line = line[:59] + '00' + line[61:]
-                unit_rate_loop = command[20:25].strip()  # command[12:18].strip()
                 loop_command = command[47:].strip()
-                loop_command = loop_command[:32] + 'XX' + loop_command[34:]
                 pdm_command = line[27:].strip()
-                pdm_command = pdm_command[:32] + 'XX' + pdm_command[34:]
             if command_type == 'bolus':
-                unit_rate_loop = command[20:25].strip()
+
                 loop_command = command[40:].strip()
                 pdm_command = line[20:].strip()
-                # Ignore acknowledge/beep setting
-                loop_command = loop_command[:32] + 'XX' + loop_command[34:]
-                pdm_command = pdm_command[:32] + 'XX' + pdm_command[34:]
-                # print(loop_command)
-                # print(pdm_command)
+
+            # Ignore acknowledge/beep setting
+            loop_command = loop_command[:32] + 'XX' + loop_command[34:]
+            pdm_command = pdm_command[:32] + 'XX' + pdm_command[34:]
+
             unit_rate_pdm = line[:5].strip()
+            unit_rate_loop = command[20:25].strip()
 
             if unit_rate_loop == unit_rate_pdm:
                 pre_name = "PDM................"
@@ -417,12 +414,14 @@ def match_temp_basals_pdm(commands, command_type, rawgit_page_pdm_values):
                     break
                 if loop_command != pdm_command:
                     match = "No"
-                    tested_results.append({"pdm": pdm, "loop": command, "match": match})
-                    mismatch += 1
             else:
                 pdm = "This unit value does not match any of the PDM values."
                 match = "No"
-        tested_results.append({"loop": command})
+        if match == "No":
+            mismatch += 1
+            tested_results.append({"pdm": pdm, "loop": command, "match": match})
+        else:
+            tested_results.append({"pdm": pdm, "loop": command})
         print(pdm)
         print(command)
         print(match)
