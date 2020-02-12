@@ -13,6 +13,7 @@
   </br>
   {% for report in contentOfFile %}
 	{% if report.allcommands %}
+            <br>
     		<h5>All {{report.command_type}} commands</h5>
         	<code>
         	    {{ report.matching_tempbasals.header }}
@@ -28,6 +29,7 @@
         {{ report.matching_tempbasals.total_results }}
         </br>
     	<code>
+        </br>
     	{% for test in report.matching_tempbasals.results %}
     	  {% if test.match %}
             {{ test.pdm }}
@@ -40,18 +42,19 @@
 		{% endfor %}
 		</code>
     {% endif %}
+    </br>
     {% if report.flashlogs%}
         <hr class="mt-0 mb-2">
         <h5>Pulse Log entries</h5>
         <code>
         {% for pulse_set in report.flashlogs.results %}
+            </br>
             {{ report.flashlogs.header }}
             </br>
             {% for pulse in pulse_set|dictsort:'log' %}
                 {{ pulse.log }}
                 </br>
             {% endfor %}
-            </br>
         {% endfor %}
         {{ report.flashlogs.header }}
         </code>

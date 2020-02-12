@@ -295,7 +295,7 @@ def parse_flashlogs(flash_logs):
     pulse_set = []
     i = 0
     for pulse in sorted(pulses, key=lambda i: i['pulse']):
-        if pulse["pulse"] != previous_pulse + 1:
+        if pulse["pulse"] != previous_pulse + 1 and len(pulse_set) != 0:
             #pulse_string.append({"log": "{} | no pulse entries recorded ...".format(str(previous_pulse + 1).zfill(5))})
             #pulse_string.append({"log": "{} | eeeeee0a pppliiib cccccccc dfgggggg | CT LOAD# PulseType l I LCV d f Val".format(str(pulse["pulse"] - 1).zfill(5))})
             commands.append(pulse_set)
@@ -367,7 +367,7 @@ def reformat_raw_hex(commands_list, command_type, captureDate=date.today()):
         command = parse_flashlogs(flash_logs)
         print("flashcommand")
         print(command)
-        commands.extend(command)
+        commands.append(command)
     return commands
 
 
@@ -431,7 +431,7 @@ def match_temp_basals_pdm(commands, command_type, rawgit_page_pdm_values):
 
     else:
         total_results = "No {} mismatches found".format(command_type)
-    #print(total_results)
+    # print(total_results)
     return {"total_results": total_results, "results": tested_results, "header":  "Day....... Time.... "+ pdm_values[1]}
 
 
@@ -459,9 +459,14 @@ def extractor(file):
     flash_logs = reformat_raw_hex(all_commands, 'flashlogs')
     print("TEST")
     print(flash_logs)
-    if len(flash_logs) > 0:
-        reports.append({"flashlogs": {"results": flash_logs, "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | CT LOAD# PulseType l I LCV d f Val"
-        }})
+    pulse_logs = []
+    #for entry in flash_logs[0]:
+    #    if len(entry) > 1:
+    #        pulse_logs.append(entry)
+
+    if len(flash_logs[0]) > 0:
+        reports.append({"flashlogs": {"results": flash_logs[0], "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | CT LOAD# PulseType l I LCV d f Val"}})
+        print(reports)
     else:
         reports.append({"flashlogs": {"results": [[{"log": 'No Read Pulse Log commands found'}]], "header": ""}})
     # print(reports)
