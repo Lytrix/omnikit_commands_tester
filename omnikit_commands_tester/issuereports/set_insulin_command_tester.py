@@ -357,7 +357,7 @@ def reformat_raw_hex(commands_list, command_type, captureDate=date.today()):
                 flash_pair["51"] = raw_value
             else:
                 continue
-        if flash_pair.get("51") and flash_pair.get("50"):
+        if flash_pair.get("51") or flash_pair.get("50"):
             print("Flash logs found:")
             print(flash_pair)
             flash_logs.append(flash_pair)
@@ -464,7 +464,7 @@ def extractor(file):
     #    if len(entry) > 1:
     #        pulse_logs.append(entry)
 
-    if len(flash_logs[0]) > 0:
+    if len(flash_logs[0][0]) > 0:
         reports.append({"flashlogs": {"results": flash_logs[0], "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | CT LOAD# PulseType l I LCV d f Val"}})
         print(reports)
     else:
