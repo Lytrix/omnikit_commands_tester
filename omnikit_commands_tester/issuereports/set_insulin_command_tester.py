@@ -54,8 +54,18 @@ def get_raw_temp_basals_xcode(xcode_log_text, captureDate=date.today()):
         regex = r"\* ([0-9-:\s]*)\s.*\s(send|receive)\s([a-z0-9]*)\n*"
         select_1a_commands = re.findall(regex, xcode_log_text, re.MULTILINE)
         for line in select_1a_commands:
-            commands.append({"time": line[0], "raw_value": line[2][12:]})
             print(line)
+            # Ignore pairing commands
+            if line[2][:8] not in ('ffffffff',''):
+                pod_number = line[2][:8]
+                print(pod_number)
+            if len(commands) < 1:
+                commands.append({"pod_number": line[2][:8], "pod_data": []})
+            elif pod_number != commands[-1].get("pod_number"):
+                commands.append({"pod_number": line[2][:8], "pod_data": []})
+                print("NEW_POD")
+            commands[-1]["pod_data"].append({"time": line[0], "raw_value": line[2][12:]})
+    print(commands)
     return commands
 
 
@@ -444,32 +454,36 @@ def extractor(file):
         all_commands = get_raw_temp_basals_rtlomni(text)
     else:
         all_commands = get_raw_temp_basals_xcode(text)
-
     reports = []
-    set_insulin_commands = [
-        {"command_type": 'tempbasal', "wiki_page": 'All-Temp-basal-units-for-0.5h.md'},
-        {"command_type": 'bolus', "wiki_page": 'All-Immediate-Bolus-Commands.md'}]
-    for set_insulin_command in set_insulin_commands:
-        pdm_values_url = parse.urljoin(wiki_url, set_insulin_command["wiki_page"])
-        temp_basal_commands = reformat_raw_hex(all_commands, set_insulin_command["command_type"])
-        matching_tempbasals = match_temp_basals_pdm(temp_basal_commands, set_insulin_command["command_type"], pdm_values_url)
-        reports.append({"command_type": set_insulin_command["command_type"],
-                        "allcommands": temp_basal_commands,
-                        "matching_tempbasals": matching_tempbasals})
-    flash_logs = reformat_raw_hex(all_commands, 'flashlogs')
-    print("TEST")
-    print(flash_logs)
-    pulse_logs = []
-    #for entry in flash_logs[0]:
-    #    if len(entry) > 1:
-    #        pulse_logs.append(entry)
+    print("PODS")
+    print(all_commands)
+    for pod in all_commands:
+        pod_commands = pod["pod_data"]
+        pod_report = []
+        set_insulin_commands = [
+            {"command_type": 'tempbasal', "wiki_page": 'All-Temp-basal-units-for-0.5h.md'},
+            {"command_type": 'bolus', "wiki_page": 'All-Immediate-Bolus-Commands.md'}]
+        for set_insulin_command in set_insulin_commands:
+            pdm_values_url = parse.urljoin(wiki_url, set_insulin_command["wiki_page"])
+            temp_basal_commands = reformat_raw_hex(pod_commands, set_insulin_command["command_type"])
+            matching_tempbasals = match_temp_basals_pdm(temp_basal_commands, set_insulin_command["command_type"], pdm_values_url)
+            pod_report.append({"command_type": set_insulin_command["command_type"],
+                            "allcommands": temp_basal_commands,
+                            "matching_tempbasals": matching_tempbasals})
+        flash_logs = reformat_raw_hex(pod_commands, 'flashlogs')
+        print("TEST")
+        print(flash_logs)
+        pulse_logs = []
+        #for entry in flash_logs[0]:
+        #    if len(entry) > 1:
+        #        pulse_logs.append(entry)
 
-    if len(flash_logs[0][0]) > 0:
-        reports.append({"flashlogs": {"results": flash_logs[0], "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | CT LOAD# PulseType l I LCV d f Val"}})
-        print(reports)
-    else:
-        reports.append({"flashlogs": {"results": [[{"log": 'No Read Pulse Log commands found'}]], "header": ""}})
-    # print(reports)
+        if len(flash_logs[0][0]) > 0:
+            pod_report.append({"flashlogs": {"results": flash_logs[0], "header": "Pulse | eeeeee0a pppliiib cccccccc dfgggggg | CT LOAD# PulseType l I LCV d f Val"}})
+        else:
+            pod_report.append({"flashlogs": {"results": [], "header": ""}})
+        reports.append({"pod":pod["pod_number"], "pod_data": pod_report})
+    print(reports)
     return reports
 
 
