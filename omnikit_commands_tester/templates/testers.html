@@ -11,9 +11,14 @@
     	<button type="submit" class="btn btn-success"/>Process</button>
 	</form>
   </br>
-  {% for report in contentOfFile %}
-	{% if report.allcommands %}
-            <br>
+  {% for pod in contentOfFile %}
+ <hr class="mt-0 mb-2">
+ <form>
+    <h3>POD: {{pod.pod}}</h3>
+</form>
+{% for report in pod.pod_data %}
+    <br>
+    {% if report.allcommands %}
     		<h5>All {{report.command_type}} commands</h5>
         	<code>
         	    {{ report.matching_tempbasals.header }}
@@ -25,40 +30,38 @@
     		</code>
 	{% endif %}
 	{% if report.matching_tempbasals%}
-    	</br>
         {{ report.matching_tempbasals.total_results }}
         </br>
     	<code>
-        </br>
     	{% for test in report.matching_tempbasals.results %}
     	  {% if test.match %}
             {{ test.pdm }}
             </br>
             {{ test.loop }}
-            </br>
             match: {{ test.match }}
-            </br>
           {% endif %}
 		{% endfor %}
 		</code>
     {% endif %}
-    </br>
     {% if report.flashlogs%}
-        <hr class="mt-0 mb-2">
         <h5>Pulse Log entries</h5>
+        {% if report.flashlogs.results|length > 0 %}
         <code>
-        {% for pulse_set in report.flashlogs.results %}
-            </br>
-            {{ report.flashlogs.header }}
-            </br>
-            {% for pulse in pulse_set|dictsort:'log' %}
-                {{ pulse.log }}
+            {% for pulse_set in report.flashlogs.results %}
                 </br>
+                {{ report.flashlogs.header }}
+                </br>
+                {% for pulse in pulse_set|dictsort:'log' %}
+                    {{ pulse.log }}
+                    </br>
+               {% endfor %}
             {% endfor %}
-        {% endfor %}
-        {{ report.flashlogs.header }}
+            {{ report.flashlogs.header }}
         </code>
+        {% else %}
+        No pulse logs entries found in issue report.
+        {% endif %}
     {% endif %}
   {% endfor %}
-  
+{% endfor %}  
 {% endblock %}
