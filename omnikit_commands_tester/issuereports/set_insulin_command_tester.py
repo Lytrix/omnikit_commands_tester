@@ -45,26 +45,26 @@ def get_raw_temp_basals_xcode(xcode_log_text, captureDate=date.today()):
     key_name_present = re.findall(key_name, xcode_log_text)
     print(key_name_present)
     if key_name_present:
-        regex = r"Send\(Hex\): .{0,12}(.*)\n([0-9-:\s]*)"
-        select_1a_commands = re.findall(regex, xcode_log_text, re.MULTILINE)
-        for line in select_1a_commands:
-            commands.append({"time": line[1], "raw_value": line[0]})
-            #print(line)
+        regex = r"\n*([0-9-:\s]*)(.*)Send\(Hex\): (.{0,8}).{0,4}([0-9a-x-:\s]*)\n([0-9-:\s]*)"
     else:
-        regex = r"\* ([0-9-:\s]*)\s.*\s(send|receive)\s([a-z0-9]*)\n*"
-        select_1a_commands = re.findall(regex, xcode_log_text, re.MULTILINE)
-        for line in select_1a_commands:
-            print(line)
-            # Ignore pairing commands
-            if line[2][:8] not in ('ffffffff',''):
-                pod_number = line[2][:8]
-                print(pod_number)
-            if len(commands) < 1:
-                commands.append({"pod_number": line[2][:8], "pod_data": []})
-            elif pod_number != commands[-1].get("pod_number"):
-                commands.append({"pod_number": line[2][:8], "pod_data": []})
-                print("NEW_POD")
-            commands[-1]["pod_data"].append({"time": line[0], "raw_value": line[2][12:]})
+        regex = r"\* ([0-9-:\s]*)\s.*\s(send|receive)\s([a-z0-9]{0,8})[a-z0-9]{0,4}([a-z0-9]*)\n*"
+    select_1a_commands = re.findall(regex, xcode_log_text, re.MULTILINE)
+    for line in select_1a_commands:
+        time = line[0]
+        pod = line[2]
+        raw_value = line[3]
+        print(line)
+        # Ignore pairing commands
+        if pod not in ('ffffffff',''):
+            pod_number = pod
+            print(pod)
+            print(pod_number)
+        if len(commands) < 1:
+            commands.append({"pod_number": pod, "pod_data": []})
+        elif pod_number != commands[-1].get("pod_number"):
+            commands.append({"pod_number": pod_number, "pod_data": []})
+            print("NEW_POD")
+        commands[-1]["pod_data"].append({"time": time, "raw_value": raw_value})
     print(commands)
     return commands
 
