@@ -4,7 +4,7 @@
 {% block content %}
     
 	<form action="#" method="post" enctype="multipart/form-data">
-		<h3>Upload Issue reports, Xcode Logs (.md) or rtlomni captures (.omni)</h3>
+		<h3>Upload Issue reports 1.9.5 or higher, Xcode Logs (.md) or rtlomni captures (.omni)</h3>
 		{% csrf_token %}
 		{{ form.as_p|crispy }}
     	<input type="file" class="btn btn-info" placeholder=".omni, .md" name="myfile" value="Browse"/>
