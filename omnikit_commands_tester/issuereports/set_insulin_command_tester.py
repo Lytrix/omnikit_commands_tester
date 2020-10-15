@@ -30,6 +30,31 @@ def get_raw_temp_basals_rtlomni(rtlomni_log_text):
     return commands
 
 
+def get_omnipod_commands(xcode_log_text):
+    """Get rows based on version of Loop or type of xcode messages"""
+    xcode_status_names = r"Send\(Hex\)"
+    xcode_status_names = re.findall(xcode_status_names, xcode_log_text)
+    print(xcode_status_names)
+    
+    if xcode_status_names:
+        print("Using Xcode parser")
+        regex = r"\n*([0-9-:\s]*)(.*)Send\(Hex\): (.{0,8}).{0,4}([0-9a-x-:\s]*)\n([0-9-:\s]*)"
+    else:
+        loop_version = re.findall(r"(Loop.*\s|\*\sVersion:\s*.*\s)v([0-9.]+)", xcode_log_text)[0][1]
+        print(loop_version)
+        if len(loop_version) > 0:
+            short_int_version = int(''.join(loop_version.split('.'))[0:2])
+            print(short_int_version)
+            if short_int_version > 22:
+                print("Using Loop Version > v2.2")
+                regex = r"\* ([0-9-:\s]*)\s.*\sOmnipod\s.*\s(send|receive)\s([a-z0-9]{0,8})[a-z0-9]{0,4}([a-z0-9]*)\n*"
+            else:
+                print("Using Loop Version < v2.2")
+                regex = r"\* ([0-9-:\s]*)\s.*\s(send|receive)\s([a-z0-9]{0,8})[a-z0-9]{0,4}([a-z0-9]*)\n*"
+    all_send_receive_commands = re.findall(regex, xcode_log_text, re.MULTILINE)
+    return all_send_receive_commands
+
+
 def get_raw_temp_basals_xcode(xcode_log_text, captureDate=date.today()):
     """
     Args:
@@ -40,16 +65,10 @@ def get_raw_temp_basals_xcode(xcode_log_text, captureDate=date.today()):
         returns a list of all raw hex commands
     """
     commands = []
-    key_name = r"Send\(Hex\)"
+    
+    all_commands = get_omnipod_commands(xcode_log_text)
 
-    key_name_present = re.findall(key_name, xcode_log_text)
-    print(key_name_present)
-    if key_name_present:
-        regex = r"\n*([0-9-:\s]*)(.*)Send\(Hex\): (.{0,8}).{0,4}([0-9a-x-:\s]*)\n([0-9-:\s]*)"
-    else:
-        regex = r"\* ([0-9-:\s]*)\s.*\s(send|receive)\s([a-z0-9]{0,8})[a-z0-9]{0,4}([a-z0-9]*)\n*"
-    select_1a_commands = re.findall(regex, xcode_log_text, re.MULTILINE)
-    for line in select_1a_commands:
+    for line in all_commands:
         time = line[0]
         pod = line[2]
         raw_value = line[3]
@@ -59,12 +78,12 @@ def get_raw_temp_basals_xcode(xcode_log_text, captureDate=date.today()):
             pod_number = pod
             print(pod)
             print(pod_number)
-        if len(commands) < 1:
-            commands.append({"pod_number": pod, "pod_data": []})
-        elif pod_number != commands[-1].get("pod_number"):
-            commands.append({"pod_number": pod_number, "pod_data": []})
-            print("NEW_POD")
-        commands[-1]["pod_data"].append({"time": time, "raw_value": raw_value})
+            if len(commands) < 1:
+                commands.append({"pod_number": pod, "pod_data": []})
+            elif pod_number != commands[-1].get("pod_number"):
+                commands.append({"pod_number": pod_number, "pod_data": []})
+                print("NEW_POD")
+            commands[-1]["pod_data"].append({"time": time, "raw_value": raw_value})
     print(commands)
     return commands
 
