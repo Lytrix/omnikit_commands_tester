@@ -38,6 +38,7 @@
             {{ test.pdm }}
             </br>
             {{ test.loop }}
+            </br>
             match: {{ test.match }}
           {% endif %}
 		{% endfor %}
@@ -48,7 +49,6 @@
         {% if report.flashlogs.results|length > 0 %}
         <code>
             {% for pulse_set in report.flashlogs.results %}
-                </br>
                 {{ report.flashlogs.header }}
                 </br>
                 {% for pulse in pulse_set|dictsort:'log' %}
