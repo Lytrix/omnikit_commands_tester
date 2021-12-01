@@ -43,14 +43,10 @@ def get_omnipod_commands(xcode_log_text):
         loop_version = re.findall(r"(Loop.*\s|\*\sVersion:\s*.*\s)v([0-9.]+)", xcode_log_text)[0][1]
         print(loop_version)
         if len(loop_version) > 0:
-            short_int_version = int(''.join(loop_version.split('.'))[0:2])
-            print(short_int_version)
-            if short_int_version > 22:
-                print("Using Loop Version > v2.2")
-                regex = r"\* ([0-9-:\s]*)\s.*\sOmnipod\s.*\s(send|receive)\s([a-z0-9]{0,8})[a-z0-9]{0,4}([a-z0-9]*)\n*"
-            else:
-                print("Using Loop Version < v2.2")
-                regex = r"\* ([0-9-:\s]*)\s.*\s(send|receive)\s([a-z0-9]{0,8})[a-z0-9]{0,4}([a-z0-9]*)\n*"
+            print("Using Loop Version > v2.2")
+            regex = r"\* ([0-9-:\s]*)\s.*\sOmnipod.*\s(send|receive)\s([a-z0-9]{0,8})[a-z0-9]{0,4}([a-z0-9]*)\n*"
+            
+
     all_send_receive_commands = re.findall(regex, xcode_log_text, re.MULTILINE)
     return all_send_receive_commands
 
