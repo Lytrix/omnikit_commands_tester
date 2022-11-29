@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class IssuereportsConfig(AppConfig):
-    name = 'issuereports'
+    name = 'omnikit_commands_tester.issuereports'
