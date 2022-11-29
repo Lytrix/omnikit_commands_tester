@@ -1,6 +1,9 @@
 # Omnikit Commands Tester #
 
-Small upload and test site to evaluate Omnikit commands. 
+Small upload and test site to evaluate Omnikit commands.
+
+Working online version can be found here:
+https://omnikit-commands-tester.herokuapp.com
 
 ### Usage ###
 
